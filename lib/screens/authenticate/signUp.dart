@@ -1,4 +1,6 @@
 import 'package:firebase_login_register/services/auth.dart';
+import 'package:firebase_login_register/utilities/loading.dart';
+import 'package:firebase_login_register/utilities/style.dart';
 import 'package:flutter/material.dart';
 
 class SignUp extends StatefulWidget {
@@ -14,6 +16,8 @@ class _SignUpState extends State<SignUp> {
 
   final AuthService _auth = AuthService();
   final _formkey = GlobalKey<FormState>();
+
+  bool loading = false;
   
   //text field state
   String email = '';
@@ -22,7 +26,7 @@ class _SignUpState extends State<SignUp> {
   
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return loading ? Loading() :Scaffold(
       backgroundColor: Colors.lightGreen[100],
       appBar: AppBar(
         backgroundColor: Colors.lightGreen,
@@ -46,6 +50,7 @@ class _SignUpState extends State<SignUp> {
             children: <Widget>[
               SizedBox(height: 20.0,),
               TextFormField(
+                decoration: textInputDecoration.copyWith(hintText: 'Email'),
                 validator: (val) => val.isEmpty ? 'Enter an email' : null,
                 onChanged: (val) {
                   setState(() => email = val);
@@ -53,6 +58,7 @@ class _SignUpState extends State<SignUp> {
               ),
               SizedBox(height: 20.0,),
               TextFormField(
+                decoration: textInputDecoration.copyWith(hintText: 'Password'),
                 validator: (val) => val.length < 6  ? 'Enter a password 6+ char long' : null,
                 obscureText: true,
                 onChanged: (val) {
@@ -70,9 +76,13 @@ class _SignUpState extends State<SignUp> {
                 ),
                 onPressed: () async{
                   if (_formkey.currentState.validate()){
+                    setState(() => loading = true);
                     dynamic result = await _auth.signUpWithEmailAndPassword(email, password);
                     if (result == null) {
-                      setState(() => error = 'please supply a valid email');
+                      setState(() {
+                        error = 'please supply a valid email';
+                        loading = false;
+                      });
                     }
                   }
                 }
